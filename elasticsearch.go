@@ -1,4 +1,4 @@
-package testcontainer_examples
+package tcinfra
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package testcontainer_examples
+package tcinfra
 
 import (
 	"context"
@@ -18,9 +18,14 @@ const (
 
 // PostgreSQLConfig contains the PostgreSQL connection settings.
 type PostgreSQLConfig struct {
-	ConnURL  string
+	// ConnURL is fully-constructed connection URL with all resolved values, using this template: "postgres://%s:%s@%s:%s/%s?sslmode=disable".
+	ConnURL string
+	// UserName is a user name used for DB connection.
 	UserName string
+	// UserPass is a user password used for DB connection.
 	UserPass string
+	// DbName is a name of the DB.
+	DbName string
 }
 
 // RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
@@ -31,6 +36,7 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 		postgresInternalPort = "5432"
 		userName             = "testuser"
 		userPass             = "testpassword"
+		dbName               = "integrationdb"
 		connURLTemplate      = "postgres://%s:%s@%s:%s/%s?sslmode=disable"
 	)
 
@@ -42,7 +48,7 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 			Env: map[string]string{
 				"POSTGRES_USER":     userName,
 				"POSTGRES_PASSWORD": userPass,
-				"POSTGRES_DB":       "testdb",
+				"POSTGRES_DB":       dbName,
 			},
 			WaitingFor: wait.ForListeningPort(postgresPort),
 		},
@@ -72,11 +78,12 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
 	}
 
-	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), "integrationdb")
+	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
 	cfg := PostgreSQLConfig{
 		ConnURL:  connURL,
 		UserName: userName,
 		UserPass: userPass,
+		DbName:   dbName,
 	}
 	log.Printf("PostgreSQL container started, running at: %q\n", connURL)
 	return cfg, terminateFn, nil
