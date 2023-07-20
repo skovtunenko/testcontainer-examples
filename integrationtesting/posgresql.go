@@ -11,23 +11,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const (
-	// postgresImageName specifies the Docker image name for PostgreSQL.
-	postgresImageName = "postgres:13.4-alpine"
-)
-
-// PostgreSQLConfig contains the PostgreSQL connection settings.
-type PostgreSQLConfig struct {
-	// ConnURL is fully-constructed connection URL with all resolved values, using this template: "postgres://%s:%s@%s:%s/%s?sslmode=disable".
-	ConnURL string
-	// UserName is a user name used for DB connection.
-	UserName string
-	// UserPass is a user password used for DB connection.
-	UserPass string
-	// DbName is a name of the DB.
-	DbName string
-}
-
 // RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
 // It returns a cleanup function.
 func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
