@@ -11,9 +11,9 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
+// RunPostgresDockerContainer creates a new Postgres test container and initializes the application repositories.
 // It returns a cleanup function.
-func RunPostgreSQLDockerContainer() (PostgresConfig, func(), error) {
+func RunPostgresDockerContainer() (PostgresConfig, func(), error) {
 	ctx := context.Background()
 	const (
 		postgresInternalPort = "5432"
@@ -39,26 +39,26 @@ func RunPostgreSQLDockerContainer() (PostgresConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "PostgreSQL container start")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "Postgres container start")
 	}
 
 	// Test container cleanup function:
 	terminateFn := func() {
 		if err := postgresContainer.Terminate(ctx); err != nil {
-			log.Println("Failed to terminate PostgreSQL test container")
+			log.Println("Failed to terminate Postgres test container")
 			return
 		}
-		log.Println("PostgreSQL test container terminated")
+		log.Println("Postgres test container terminated")
 	}
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL host")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres host")
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres port")
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
@@ -68,6 +68,6 @@ func RunPostgreSQLDockerContainer() (PostgresConfig, func(), error) {
 		UserPass: userPass,
 		DbName:   dbName,
 	}
-	log.Printf("PostgreSQL container started, running at: %q\n", connURL)
+	log.Printf("Postgres container started, running at: %q\n", connURL)
 	return cfg, terminateFn, nil
 }

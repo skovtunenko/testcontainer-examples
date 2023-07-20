@@ -25,13 +25,13 @@ func TestMain(m *testing.M) {
 	}
 	stdlog.Printf("MongoDB configuration: %+v", mongoConf)
 
-	postgresConf, terminatePostgresFn, err := integrationtesting.RunPostgreSQLDockerContainer()
+	postgresConf, terminatePostgresFn, err := integrationtesting.RunPostgresDockerContainer()
 	if err != nil {
-		stdlog.Printf("failed to initialize PostgreSQL test container: %+v", err)
+		stdlog.Printf("failed to initialize Postgres test container: %+v", err)
 		os.Exit(1)
 		return
 	}
-	stdlog.Printf("PostgreSQL configuration: %+v", postgresConf)
+	stdlog.Printf("Postgres configuration: %+v", postgresConf)
 
 	var exitCode int
 	func() {
