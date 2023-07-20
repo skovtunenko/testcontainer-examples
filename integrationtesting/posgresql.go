@@ -13,7 +13,7 @@ import (
 
 // RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
 // It returns a cleanup function.
-func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
+func RunPostgreSQLDockerContainer() (PostgresConfig, func(), error) {
 	ctx := context.Background()
 	const (
 		postgresInternalPort = "5432"
@@ -39,7 +39,7 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "PostgreSQL container start")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "PostgreSQL container start")
 	}
 
 	// Test container cleanup function:
@@ -53,16 +53,16 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL host")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL host")
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
-	cfg := PostgreSQLConfig{
+	cfg := PostgresConfig{
 		ConnURL:  connURL,
 		UserName: userName,
 		UserPass: userPass,

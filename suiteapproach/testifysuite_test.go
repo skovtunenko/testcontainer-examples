@@ -1,6 +1,7 @@
 package suiteapproach
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -8,31 +9,22 @@ import (
 	"github.com/skovtunenko/testcontainer-examples/integrationtesting"
 )
 
-func TestPostgreSQLSuite(t *testing.T) {
-	suite.Run(t, &PostgreSQLSuite{})
+func TestDemoSuite(t *testing.T) {
+	os.Setenv("RUN_INTEGRATION_TESTS", "yes, please!")
+	suite.Run(t, &DemoPostgresSuite{})
 }
 
-type PostgreSQLSuite struct {
-	suite.Suite
-	postgresqlConfig  integrationtesting.PostgreSQLConfig
-	postgresqlCleanFn func()
+type DemoPostgresSuite struct {
+	integrationtesting.PostgresSuite
 }
 
-func (suite *PostgreSQLSuite) SetupSuite() {
-	r := suite.Require()
-	conf, cleanFn, err := integrationtesting.RunPostgreSQLDockerContainer()
-	r.NoError(err)
-	suite.postgresqlConfig = conf
-	suite.postgresqlCleanFn = cleanFn
+var _ suite.SetupAllSuite = &DemoPostgresSuite{}
+var _ suite.TearDownAllSuite = &DemoPostgresSuite{}
+
+func (suite *DemoPostgresSuite) TestExample1() {
+	suite.T().Logf("Running example test, initialized postgres connection URL: %+v", suite.GetPostgresConnectionURL())
 }
 
-func (suite *PostgreSQLSuite) TearDownSuite() {
-	suite.postgresqlCleanFn()
-}
-
-var _ suite.SetupAllSuite = &PostgreSQLSuite{}
-var _ suite.TearDownAllSuite = &PostgreSQLSuite{}
-
-func (suite *PostgreSQLSuite) TestExample() {
-	suite.T().Logf("Running example test, initialized postgreSQL config: %+v", suite.postgresqlConfig)
+func (suite *DemoPostgresSuite) TestExample2() {
+	suite.T().Logf("Running example test, initialized postgres connection URL: %+v", suite.GetPostgresConnectionURL())
 }
