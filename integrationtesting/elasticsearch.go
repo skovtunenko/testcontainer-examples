@@ -1,4 +1,4 @@
-package tcinfra
+package integrationtesting
 
 import (
 	"context"

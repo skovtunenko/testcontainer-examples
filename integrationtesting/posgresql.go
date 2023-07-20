@@ -1,4 +1,4 @@
-package tcinfra
+package integrationtesting
 
 import (
 	"context"
@@ -11,26 +11,9 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const (
-	// postgresImageName specifies the Docker image name for PostgreSQL.
-	postgresImageName = "postgres:13.4-alpine"
-)
-
-// PostgreSQLConfig contains the PostgreSQL connection settings.
-type PostgreSQLConfig struct {
-	// ConnURL is fully-constructed connection URL with all resolved values, using this template: "postgres://%s:%s@%s:%s/%s?sslmode=disable".
-	ConnURL string
-	// UserName is a user name used for DB connection.
-	UserName string
-	// UserPass is a user password used for DB connection.
-	UserPass string
-	// DbName is a name of the DB.
-	DbName string
-}
-
-// RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
+// RunPostgresDockerContainer creates a new Postgres test container and initializes the application repositories.
 // It returns a cleanup function.
-func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
+func RunPostgresDockerContainer() (PostgresConfig, func(), error) {
 	ctx := context.Background()
 	const (
 		postgresInternalPort = "5432"
@@ -56,35 +39,35 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "PostgreSQL container start")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "Postgres container start")
 	}
 
 	// Test container cleanup function:
 	terminateFn := func() {
 		if err := postgresContainer.Terminate(ctx); err != nil {
-			log.Println("Failed to terminate PostgreSQL test container")
+			log.Println("Failed to terminate Postgres test container")
 			return
 		}
-		log.Println("PostgreSQL test container terminated")
+		log.Println("Postgres test container terminated")
 	}
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL host")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres host")
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
+		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres port")
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
-	cfg := PostgreSQLConfig{
+	cfg := PostgresConfig{
 		ConnURL:  connURL,
 		UserName: userName,
 		UserPass: userPass,
 		DbName:   dbName,
 	}
-	log.Printf("PostgreSQL container started, running at: %q\n", connURL)
+	log.Printf("Postgres container started, running at: %q\n", connURL)
 	return cfg, terminateFn, nil
 }
