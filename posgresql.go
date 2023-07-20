@@ -23,9 +23,9 @@ type PostgreSQLConfig struct {
 	UserPass string
 }
 
-// runPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
+// RunPostgreSQLDockerContainer creates a new PostgreSQL test container and initializes the application repositories.
 // It returns a cleanup function.
-func runPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
+func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 	ctx := context.Background()
 	const (
 		postgresInternalPort = "5432"
