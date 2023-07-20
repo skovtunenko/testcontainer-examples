@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	tcinfra "github.com/skovtunenko/testcontainer-examples"
+	"github.com/skovtunenko/testcontainer-examples/integrationtesting"
 )
 
 func TestPostgreSQLSuite(t *testing.T) {
@@ -14,13 +14,13 @@ func TestPostgreSQLSuite(t *testing.T) {
 
 type PostgreSQLSuite struct {
 	suite.Suite
-	postgresqlConfig  tcinfra.PostgreSQLConfig
+	postgresqlConfig  integrationtesting.PostgreSQLConfig
 	postgresqlCleanFn func()
 }
 
 func (suite *PostgreSQLSuite) SetupSuite() {
 	r := suite.Require()
-	conf, cleanFn, err := tcinfra.RunPostgreSQLDockerContainer()
+	conf, cleanFn, err := integrationtesting.RunPostgreSQLDockerContainer()
 	r.NoError(err)
 	suite.postgresqlConfig = conf
 	suite.postgresqlCleanFn = cleanFn
