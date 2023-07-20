@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
-	tcexamples "github.com/skovtunenko/testcontainer-examples"
+	tcinfra "github.com/skovtunenko/testcontainer-examples"
 )
 
 func TestMain(m *testing.M) {
-	esConf, terminateElasticFn, err := tcexamples.RunElasticsearchDockerContainer()
+	esConf, terminateElasticFn, err := tcinfra.RunElasticsearchDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise ElasticSearch test container: %+v", err)
 		os.Exit(1)
@@ -17,7 +17,7 @@ func TestMain(m *testing.M) {
 	}
 	stdlog.Printf("ElasticSearch configuration: %+v", esConf)
 
-	mongoConf, terminateMongoFn, err := tcexamples.RunMongoDockerContainer()
+	mongoConf, terminateMongoFn, err := tcinfra.RunMongoDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise MongoDB test container: %+v", err)
 		os.Exit(1)
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 	}
 	stdlog.Printf("MongoDB configuration: %+v", mongoConf)
 
-	postgresConf, terminatePostgresFn, err := tcexamples.RunPostgreSQLDockerContainer()
+	postgresConf, terminatePostgresFn, err := tcinfra.RunPostgreSQLDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialize PostgreSQL test container: %+v", err)
 		os.Exit(1)

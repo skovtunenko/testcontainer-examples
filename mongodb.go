@@ -1,4 +1,4 @@
-package tcexamples
+package tcinfra
 
 import (
 	"context"
