@@ -1,5 +1,3 @@
-//go:build integration
-
 package testcontainer_examples
 
 import (
@@ -9,17 +7,19 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	terminateElasticFn, err := RunElasticsearchDockerContainer()
+	esConf, terminateElasticFn, err := RunElasticsearchDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise ElasticSearch test container: %+v", err)
 		return
 	}
+	stdlog.Printf("ElasticSearch configuration: %+v", esConf)
 
-	terminateMongoFn, err := RunMongoDockerContainer()
+	mongoConf, terminateMongoFn, err := RunMongoDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise MongoDB test container: %+v", err)
 		return
 	}
+	stdlog.Printf("MongoDB configuration: %+v", mongoConf)
 
 	var exitCode int
 	func() {
