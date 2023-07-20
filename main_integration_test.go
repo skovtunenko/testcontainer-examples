@@ -41,3 +41,7 @@ func TestMain(m *testing.M) {
 	}()
 	os.Exit(exitCode)
 }
+
+func TestSample(t *testing.T) {
+	t.Log("Executing simple test")
+}
