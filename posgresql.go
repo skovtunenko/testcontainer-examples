@@ -72,7 +72,7 @@ func RunPostgreSQLDockerContainer() (PostgreSQLConfig, func(), error) {
 		return PostgreSQLConfig{}, func() {}, errors.Wrap(err, "map PostgreSQL port")
 	}
 
-	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), "testdb")
+	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), "integrationdb")
 	cfg := PostgreSQLConfig{
 		ConnURL:  connURL,
 		UserName: userName,
