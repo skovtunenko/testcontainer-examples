@@ -17,7 +17,7 @@ const (
 	// postgresImageName specifies the Docker image name for Postgres.
 	postgresImageName = "postgres:13.4-alpine"
 )
-const integrationRunnerEnvVar = "RUN_INTEGRATION_TESTS"
+const IntegrationRunnerEnvVar = "RUN_INTEGRATION_TESTS"
 
 // PostgresSuite is a basic integration suite for Postgres-related integration tests.
 type PostgresSuite struct {
@@ -34,8 +34,8 @@ func (suite *PostgresSuite) GetPostgresConnectionURL() string {
 
 // SetupSuite will run before the tests in the suite are run.
 func (suite *PostgresSuite) SetupSuite() {
-	if os.Getenv(integrationRunnerEnvVar) == "" {
-		suite.T().Skipf("Skipping Postgres integration tests. To enable them, set non-empty value in %q environment variable", integrationRunnerEnvVar)
+	if os.Getenv(IntegrationRunnerEnvVar) == "" {
+		suite.T().Skipf("Skipping Postgres integration tests. To enable them, set non-empty value in %q environment variable", IntegrationRunnerEnvVar)
 		return
 	}
 
