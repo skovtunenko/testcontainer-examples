@@ -8,7 +8,6 @@ import (
 
 	"github.com/docker/go-connections/nat"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -18,7 +17,7 @@ const (
 	// postgresImageName specifies the Docker image name for Postgres.
 	postgresImageName = "postgres:13.4-alpine"
 )
-const integrationRunnerEnvVar = "RUN_INTEGRATION_TESTS"
+const IntegrationRunnerEnvVar = "RUN_INTEGRATION_TESTS"
 
 // PostgresSuite is a basic integration suite for Postgres-related integration tests.
 type PostgresSuite struct {
@@ -35,8 +34,8 @@ func (suite *PostgresSuite) GetPostgresConnectionURL() string {
 
 // SetupSuite will run before the tests in the suite are run.
 func (suite *PostgresSuite) SetupSuite() {
-	if os.Getenv(integrationRunnerEnvVar) == "" {
-		suite.T().Skipf("Skipping Postgres integration tests. To enable them, set non-empty value in %q environment variable", integrationRunnerEnvVar)
+	if os.Getenv(IntegrationRunnerEnvVar) == "" {
+		suite.T().Skipf("Skipping Postgres integration tests. To enable them, set non-empty value in %q environment variable", IntegrationRunnerEnvVar)
 		return
 	}
 
@@ -133,7 +132,7 @@ func runPostgresDockerContainer(t *testing.T) (PostgresConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "Postgres container start")
+		return PostgresConfig{}, func() {}, fmt.Errorf("postgres container start: %w", err)
 	}
 
 	// Test container cleanup function:
@@ -147,12 +146,12 @@ func runPostgresDockerContainer(t *testing.T) (PostgresConfig, func(), error) {
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres host")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres host: %w", err)
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres port")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres port: %w", err)
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)

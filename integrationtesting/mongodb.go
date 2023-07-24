@@ -6,7 +6,6 @@ import (
 	stdlog "log"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -24,7 +23,7 @@ type MongoConfig struct {
 }
 
 // RunMongoDockerContainer creates new MongoDB test container and initializes application repositories.
-// Returns cleanup function.
+// Returns cleanup function that must be called.
 func RunMongoDockerContainer() (MongoConfig, func(), error) {
 	ctx := context.Background()
 	const (
@@ -50,13 +49,13 @@ func RunMongoDockerContainer() (MongoConfig, func(), error) {
 	}
 	mongoContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return MongoConfig{}, func() {}, errors.Wrap(err, "MongoDB container start")
+		return MongoConfig{}, func() {}, fmt.Errorf("mongoDB container start: %w", err)
 	}
 
 	// Test container clean up function:
 	terminateFn := func() {
 		if err := mongoContainer.Terminate(ctx); err != nil {
-			stdlog.Println("failed to terminate MongoDB test container")
+			stdlog.Printf("failed to terminate MongoDB test container: %v", err)
 			return
 		}
 		stdlog.Println("MongoDB test container terminated")
@@ -64,12 +63,12 @@ func RunMongoDockerContainer() (MongoConfig, func(), error) {
 
 	mongoHostIP, err := mongoContainer.Host(ctx)
 	if err != nil {
-		return MongoConfig{}, func() {}, errors.Wrap(err, "map MongoDB host")
+		return MongoConfig{}, terminateFn, fmt.Errorf("map MongoDB host: %w", err)
 	}
 
 	mongoHostPort, err := mongoContainer.MappedPort(ctx, mongoPort)
 	if err != nil {
-		return MongoConfig{}, func() {}, errors.Wrap(err, "map MongoDB port")
+		return MongoConfig{}, terminateFn, fmt.Errorf("map MongoDB port: %w", err)
 	}
 
 	mongoURL := fmt.Sprintf(mongoConnectionURLTemplate, userName, userPass, mongoHostIP, mongoHostPort.Port())

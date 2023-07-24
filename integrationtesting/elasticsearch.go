@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -24,7 +23,7 @@ type ElasticConfig struct {
 }
 
 // RunElasticsearchDockerContainer creates new ElasticSearch test container and initializes application repositories.
-// Returns cleanup function.
+// Returns cleanup function that must be called.
 func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
 	ctx := context.Background()
 	rand.Seed(time.Now().UnixMilli())
@@ -52,13 +51,13 @@ func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
 	}
 	elasticContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return ElasticConfig{}, func() {}, errors.Wrap(err, "ElasticSearch container start")
+		return ElasticConfig{}, func() {}, fmt.Errorf("elasticSearch container start: %w", err)
 	}
 
 	// Test container clean-up function:
 	terminateFn := func() {
 		if err := elasticContainer.Terminate(ctx); err != nil {
-			stdlog.Println("failed to terminate ElasticSearch test container")
+			stdlog.Printf("failed to terminate ElasticSearch test container: %+v", err)
 			return
 		}
 		stdlog.Println("ElasticSearch test container terminated")
@@ -66,12 +65,12 @@ func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
 
 	elasticHostIP, err := elasticContainer.Host(ctx)
 	if err != nil {
-		return ElasticConfig{}, func() {}, errors.Wrap(err, "map ElasticSearch host")
+		return ElasticConfig{}, terminateFn, fmt.Errorf("map ElasticSearch host: %w", err)
 	}
 
 	elasticHostPort, err := elasticContainer.MappedPort(ctx, elasticPort)
 	if err != nil {
-		return ElasticConfig{}, func() {}, errors.Wrap(err, "map ElasticSearch port")
+		return ElasticConfig{}, terminateFn, fmt.Errorf("map ElasticSearch port: %w", err)
 	}
 
 	elasticURL := fmt.Sprintf(elasticConnectionURLTemplate, elasticHostIP, elasticHostPort.Port())
