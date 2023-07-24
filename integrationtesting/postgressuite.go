@@ -8,7 +8,6 @@ import (
 
 	"github.com/docker/go-connections/nat"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -133,7 +132,7 @@ func runPostgresDockerContainer(t *testing.T) (PostgresConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "Postgres container start")
+		return PostgresConfig{}, func() {}, fmt.Errorf("postgres container start: %w", err)
 	}
 
 	// Test container cleanup function:
@@ -147,12 +146,12 @@ func runPostgresDockerContainer(t *testing.T) (PostgresConfig, func(), error) {
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres host")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres host: %w", err)
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres port")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres port: %w", err)
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
