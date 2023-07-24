@@ -6,13 +6,12 @@ import (
 	"log"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/pkg/errors"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 // RunPostgresDockerContainer creates a new Postgres test container and initializes the application repositories.
-// It returns a cleanup function.
+// It returns a cleanup function that must be called.
 func RunPostgresDockerContainer() (PostgresConfig, func(), error) {
 	ctx := context.Background()
 	const (
@@ -39,13 +38,13 @@ func RunPostgresDockerContainer() (PostgresConfig, func(), error) {
 	}
 	postgresContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "Postgres container start")
+		return PostgresConfig{}, func() {}, fmt.Errorf("postgres container start: %w", err)
 	}
 
 	// Test container cleanup function:
 	terminateFn := func() {
 		if err := postgresContainer.Terminate(ctx); err != nil {
-			log.Println("Failed to terminate Postgres test container")
+			log.Printf("Failed to terminate Postgres test container: %+v", err)
 			return
 		}
 		log.Println("Postgres test container terminated")
@@ -53,12 +52,12 @@ func RunPostgresDockerContainer() (PostgresConfig, func(), error) {
 
 	postgresHostIP, err := postgresContainer.Host(ctx)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres host")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres host: %w", err)
 	}
 
 	postgresHostPort, err := postgresContainer.MappedPort(ctx, postgresPort)
 	if err != nil {
-		return PostgresConfig{}, func() {}, errors.Wrap(err, "map Postgres port")
+		return PostgresConfig{}, terminateFn, fmt.Errorf("map Postgres port: %w", err)
 	}
 
 	connURL := fmt.Sprintf(connURLTemplate, userName, userPass, postgresHostIP, postgresHostPort.Port(), dbName)
