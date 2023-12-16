@@ -15,7 +15,7 @@ import (
 
 const (
 	// postgresImageName specifies the Docker image name for Postgres.
-	postgresImageName = "postgres:13.4-alpine"
+	postgresImageName = "postgres:16.1-alpine"
 )
 const IntegrationRunnerEnvVar = "RUN_INTEGRATION_TESTS"
 
@@ -30,6 +30,11 @@ type PostgresSuite struct {
 // GetPostgresConnectionURL returns connection URL to integration Postgres in Docker.
 func (suite *PostgresSuite) GetPostgresConnectionURL() string {
 	return suite.postgresConfig.ConnURL
+}
+
+// PgxPool returns a connection pool to integration Postgres in Docker.
+func (suite *PostgresSuite) PgxPool() *pgxpool.Pool {
+	return suite.postgresPool
 }
 
 // SetupSuite will run before the tests in the suite are run.
