@@ -8,30 +8,40 @@ import (
 	"github.com/skovtunenko/testcontainer-examples/integrationtesting"
 )
 
+// Global variables to store configuration of test containers.
+var (
+	esConf                 integrationtesting.ElasticConfig
+	mongoConf              integrationtesting.MongoConfig
+	postgresDockerInstance integrationtesting.PostgresDockerInstance
+)
+
 func TestMain(m *testing.M) {
-	esConf, terminateElasticFn, err := integrationtesting.RunElasticsearchDockerContainer()
+	es, terminateElasticFn, err := integrationtesting.RunElasticsearchDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise ElasticSearch test container: %+v", err)
 		os.Exit(1)
 		return
 	}
-	stdlog.Printf("ElasticSearch configuration: %+v", esConf)
+	stdlog.Printf("ElasticSearch configuration: %+v", es)
+	esConf = es
 
-	mongoConf, terminateMongoFn, err := integrationtesting.RunMongoDockerContainer()
+	mongo, terminateMongoFn, err := integrationtesting.RunMongoDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialise MongoDB test container: %+v", err)
 		os.Exit(1)
 		return
 	}
-	stdlog.Printf("MongoDB configuration: %+v", mongoConf)
+	stdlog.Printf("MongoDB configuration: %+v", mongo)
+	mongoConf = mongo
 
-	postgresConf, terminatePostgresFn, err := integrationtesting.RunPostgresDockerContainer()
+	postgres, terminatePostgresFn, err := integrationtesting.RunPostgresDockerContainer()
 	if err != nil {
 		stdlog.Printf("failed to initialize Postgres test container: %+v", err)
 		os.Exit(1)
 		return
 	}
-	stdlog.Printf("Postgres configuration: %+v", postgresConf)
+	stdlog.Printf("Postgres configuration: %+v", postgres)
+	postgresDockerInstance = postgres
 
 	var exitCode int
 	func() {
@@ -44,6 +54,15 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestSample(t *testing.T) {
-	t.Log("Executing simple test")
+func TestSampleMongo(t *testing.T) {
+	t.Logf("Executing simple Mongo test with configuration: %+v", mongoConf)
+}
+
+func TestSampleElastic(t *testing.T) {
+	t.Logf("Executing simple Elastic test with configuration: %+v", esConf)
+}
+
+func TestSamplePostgres(t *testing.T) {
+	t.Logf("Executing simple Postgres test with configuration: %+v", postgresDockerInstance)
+	postgresDockerInstance.MustTruncateData()
 }
