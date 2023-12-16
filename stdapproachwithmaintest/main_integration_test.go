@@ -1,4 +1,4 @@
-package stdapproach
+package stdapproachwithmaintest
 
 import (
 	stdlog "log"
