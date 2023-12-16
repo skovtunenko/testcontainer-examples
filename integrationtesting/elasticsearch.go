@@ -17,14 +17,14 @@ const (
 	elasticImageName = "elasticsearch:7.17.4"
 )
 
-// ElasticConfig is a config with ElasticSearch connection settings.
-type ElasticConfig struct {
+// ElasticDockerInstance is a config with ElasticSearch connection settings.
+type ElasticDockerInstance struct {
 	ConnURL string
 }
 
 // RunElasticsearchDockerContainer creates new ElasticSearch test container and initializes application repositories.
 // Returns cleanup function that must be called.
-func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
+func RunElasticsearchDockerContainer() (ElasticDockerInstance, func(), error) {
 	ctx := context.Background()
 	rand.Seed(time.Now().UnixMilli())
 	const (
@@ -51,7 +51,7 @@ func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
 	}
 	elasticContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return ElasticConfig{}, func() {}, fmt.Errorf("elasticSearch container start: %w", err)
+		return ElasticDockerInstance{}, func() {}, fmt.Errorf("elasticSearch container start: %w", err)
 	}
 
 	// Test container clean-up function:
@@ -65,19 +65,19 @@ func RunElasticsearchDockerContainer() (ElasticConfig, func(), error) {
 
 	elasticHostIP, err := elasticContainer.Host(ctx)
 	if err != nil {
-		return ElasticConfig{}, terminateFn, fmt.Errorf("map ElasticSearch host: %w", err)
+		return ElasticDockerInstance{}, terminateFn, fmt.Errorf("map ElasticSearch host: %w", err)
 	}
 
 	elasticHostPort, err := elasticContainer.MappedPort(ctx, elasticPort)
 	if err != nil {
-		return ElasticConfig{}, terminateFn, fmt.Errorf("map ElasticSearch port: %w", err)
+		return ElasticDockerInstance{}, terminateFn, fmt.Errorf("map ElasticSearch port: %w", err)
 	}
 
 	elasticURL := fmt.Sprintf(elasticConnectionURLTemplate, elasticHostIP, elasticHostPort.Port())
-	cfg := ElasticConfig{
+	instance := ElasticDockerInstance{
 		ConnURL: elasticURL,
 	}
 
 	stdlog.Printf("ElasticSearch container started, running at: %q\n", elasticURL)
-	return cfg, terminateFn, nil
+	return instance, terminateFn, nil
 }
