@@ -39,7 +39,7 @@ func (suite *PostgresSuite) PgxPool() *pgxpool.Pool {
 
 // SetupSuite will run before the tests in the suite are run.
 func (suite *PostgresSuite) SetupSuite() {
-	if os.Getenv(IntegrationRunnerEnvVar) == "" {
+	if _, ok := os.LookupEnv(IntegrationRunnerEnvVar); !ok {
 		suite.T().Skipf("Skipping Postgres integration tests. To enable them, set non-empty value in %q environment variable", IntegrationRunnerEnvVar)
 		return
 	}
