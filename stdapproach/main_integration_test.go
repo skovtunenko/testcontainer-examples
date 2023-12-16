@@ -8,10 +8,10 @@ import (
 	"github.com/skovtunenko/testcontainer-examples/integrationtesting"
 )
 
-// Global variables to store configuration of test containers.
+// Global variables to store configuration of running test containers.
 var (
-	esConf                 integrationtesting.ElasticConfig
-	mongoConf              integrationtesting.MongoConfig
+	esDockerInstance       integrationtesting.ElasticDockerInstance
+	mongoDockerInstance    integrationtesting.MongoDockerInstance
 	postgresDockerInstance integrationtesting.PostgresDockerInstance
 )
 
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	stdlog.Printf("ElasticSearch configuration: %+v", es)
-	esConf = es
+	esDockerInstance = es
 
 	mongo, terminateMongoFn, err := integrationtesting.RunMongoDockerContainer()
 	if err != nil {
@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	stdlog.Printf("MongoDB configuration: %+v", mongo)
-	mongoConf = mongo
+	mongoDockerInstance = mongo
 
 	postgres, terminatePostgresFn, err := integrationtesting.RunPostgresDockerContainer()
 	if err != nil {
@@ -55,11 +55,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestSampleMongo(t *testing.T) {
-	t.Logf("Executing simple Mongo test with configuration: %+v", mongoConf)
+	t.Logf("Executing simple Mongo test with configuration: %+v", mongoDockerInstance)
 }
 
 func TestSampleElastic(t *testing.T) {
-	t.Logf("Executing simple Elastic test with configuration: %+v", esConf)
+	t.Logf("Executing simple Elastic test with configuration: %+v", esDockerInstance)
 }
 
 func TestSamplePostgres(t *testing.T) {

@@ -15,8 +15,8 @@ const (
 	mongoImageName = "mongo:4.2.21"
 )
 
-// MongoConfig is a config with Mongo connection settings.
-type MongoConfig struct {
+// MongoDockerInstance is a config with MongoDB connection settings.
+type MongoDockerInstance struct {
 	ConnURL  string
 	UserName string
 	UserPass string
@@ -24,7 +24,7 @@ type MongoConfig struct {
 
 // RunMongoDockerContainer creates new MongoDB test container and initializes application repositories.
 // Returns cleanup function that must be called.
-func RunMongoDockerContainer() (MongoConfig, func(), error) {
+func RunMongoDockerContainer() (MongoDockerInstance, func(), error) {
 	ctx := context.Background()
 	const (
 		mongoInternalPort = "27017"
@@ -49,7 +49,7 @@ func RunMongoDockerContainer() (MongoConfig, func(), error) {
 	}
 	mongoContainer, err := testcontainers.GenericContainer(ctx, containerRequest)
 	if err != nil {
-		return MongoConfig{}, func() {}, fmt.Errorf("mongoDB container start: %w", err)
+		return MongoDockerInstance{}, func() {}, fmt.Errorf("mongoDB container start: %w", err)
 	}
 
 	// Test container clean up function:
@@ -63,20 +63,20 @@ func RunMongoDockerContainer() (MongoConfig, func(), error) {
 
 	mongoHostIP, err := mongoContainer.Host(ctx)
 	if err != nil {
-		return MongoConfig{}, terminateFn, fmt.Errorf("map MongoDB host: %w", err)
+		return MongoDockerInstance{}, terminateFn, fmt.Errorf("map MongoDB host: %w", err)
 	}
 
 	mongoHostPort, err := mongoContainer.MappedPort(ctx, mongoPort)
 	if err != nil {
-		return MongoConfig{}, terminateFn, fmt.Errorf("map MongoDB port: %w", err)
+		return MongoDockerInstance{}, terminateFn, fmt.Errorf("map MongoDB port: %w", err)
 	}
 
 	mongoURL := fmt.Sprintf(mongoConnectionURLTemplate, userName, userPass, mongoHostIP, mongoHostPort.Port())
-	cfg := MongoConfig{
+	instance := MongoDockerInstance{
 		ConnURL:  mongoURL,
 		UserName: userName,
 		UserPass: userPass,
 	}
 	stdlog.Printf("MongoDB container started, running at: %q\n", mongoURL)
-	return cfg, terminateFn, nil
+	return instance, terminateFn, nil
 }
